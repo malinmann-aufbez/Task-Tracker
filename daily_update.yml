@@ -2,16 +2,9 @@ name: Task-Tracker Daily Update
 
 on:
   schedule:
-    # GitHub-Cron läuft in UTC. Wir triggern zu zwei Zeiten, damit ganzjährig
-    # genau 17:50 Berliner Zeit gesendet wird (Sommer- und Winterzeit):
-    #   15:50 UTC = 17:50 CEST (Sommerzeit)
-    #   16:50 UTC = 17:50 CET  (Winterzeit)
-    # Das Python-Skript sendet nur, wenn es in Berlin wirklich 17 Uhr ist.
     - cron: "50 15 * * 1-5"
     - cron: "50 16 * * 1-5"
   workflow_dispatch:
-    # Manueller Start-Button in GitHub. Ignoriert das Zeitfenster (FORCE=1),
-    # sendet aber eine echte Mail. Zum reinen Testen unten DRY_RUN nutzen.
     inputs:
       dry_run:
         description: "Nur Vorschau erzeugen, keine Mail senden (true/false)"
@@ -44,7 +37,6 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           RECIPIENT: ${{ secrets.RECIPIENT }}
-          # Manueller Lauf: Zeitfenster ignorieren; DRY_RUN aus dem Button übernehmen
           FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
           DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
         run: python generate_and_send.py
