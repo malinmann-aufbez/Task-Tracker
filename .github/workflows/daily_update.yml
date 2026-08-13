@@ -1,0 +1,42 @@
+name: Task-Tracker Daily Update
+
+on:
+  schedule:
+    - cron: "50 15 * * 1-5"
+    - cron: "50 16 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Nur Vorschau erzeugen, keine Mail senden (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  send-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Abhängigkeiten installieren
+        run: pip install -r requirements.txt
+
+      - name: Update erzeugen & senden
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
+          APPS_SCRIPT_TOKEN: ${{ secrets.APPS_SCRIPT_TOKEN }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT: ${{ secrets.RECIPIENT }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
+        run: python generate_and_send.py
