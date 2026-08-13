@@ -1,0 +1,7 @@
+# Nie ins Repo: Zugangsdaten & lokale Daten
+.env
+*.xlsx
+sample.xlsx
+service_account*.json
+__pycache__/
+*.pyc
